@@ -1,12 +1,12 @@
 import express, { Request, Response, Router } from 'express';
 import { body, validationResult } from 'express-validator';
-import {authorize} from '../../middleware/authorize'
+import { authorize } from '../../middleware/authorize';
 import bcrypt from 'bcryptjs';
 import gravatar from 'gravatar';
 import jwt from 'jsonwebtoken';
 import config from 'config';
 
-import User from '../../models/User';
+import User, { TUser } from '../../models/User';
 
 interface UserInput {
   name: string;
@@ -20,16 +20,19 @@ const usersRouter = Router();
 // @route       GET api/auth
 // @desc        Load user / Get a user
 // @access      PUBLIC
-usersRouter.get('/', authorize, async (req:Request, res:Response) => {
-  const {id} = req.body.locals;
-  if(!id) {
-    res.status(401).json({error: {msg: "Unauthorized."}});
+usersRouter.get('/', authorize, async (req: Request, res: Response) => {
+  const { id } = req.body.locals;
+
+  if (!id) {
+    res.status(401).json({ error: { msg: 'Unauthorized.' } });
   }
-  try{
-    const user = await User.findById(id).select("-password");
+
+  try {
+    const user = await User.findById(id, 'id name email avatar characters');
+    console.log('[BE] getUser:', user?.id);
     res.status(200).json(user);
-  }catch(err){
-    res.status(500).json("Server Error");
+  } catch (err) {
+    res.status(500).json('Server Error');
   }
 });
 
@@ -39,16 +42,13 @@ usersRouter.get('/', authorize, async (req:Request, res:Response) => {
 usersRouter.post(
   '/',
   [
-    body('name', 'You must enter your name.').notEmpty(),
-    body('email', 'You must submit a valid email.').notEmpty().isEmail(),
-    body('password', 'A valid password is needed.').notEmpty(),
+    body(['name', 'email', 'password'], 'You forgot to fill some fields!').notEmpty(),
+    body('email', 'You must submit a valid email.').isEmail(),
     body('password', 'A password must be between 6 and 20 characters in length.').isLength({ min: 6, max: 20 }),
   ],
   async (req: express.Request, res: express.Response) => {
-    // Validation Errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // we will return the errors in an array, which we can then use to make alerts in the FrontEnd
       return res.status(400).json({ errors: errors.array() });
     }
 
@@ -57,13 +57,13 @@ usersRouter.post(
     try {
       const checkUser = await User.findOne({ email });
       if (checkUser) {
-        return res.status(400).json({ msg: 'There already exists a user with this email.' });
+        return res.status(400).json({ errors: [{ msg: 'Invalid credentials.' }] });
       }
 
       // GRAVATAR
       const avatar = gravatar.url(email, {
         size: '200px',
-        d: '',
+        d: 'mp',
         r: 'pg',
       });
 
@@ -85,13 +85,13 @@ usersRouter.post(
         {
           id: result.id,
           email: result.email,
-          avatar: result.avatar
+          avatar: result.avatar,
         },
         config.get('jwtSecret'),
         { expiresIn: '10h', algorithm: 'HS512' },
       );
 
-      res.json({token});
+      res.json({ token });
     } catch (err) {
       console.error(err);
     }

@@ -19,4 +19,3 @@ export interface TUserInput {
 }
 
 export type TLoginForm = Omit<TUserInput, 'name' | 'gender'>;
-

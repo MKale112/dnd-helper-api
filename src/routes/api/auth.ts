@@ -12,13 +12,13 @@ const authRouter = Router();
 authRouter.post(
   '/',
   [
-    body('email', 'You must enter a valid email.').notEmpty().isEmail(),
-    body('password', 'A valid password is needed.').notEmpty(),
+    body('email', 'Invalid credentials.').notEmpty().isEmail(),
+    body(['email', 'password'], 'Invalid credentials.').notEmpty(),
   ],
   async (req: Request, res: Response) => {
     const err = validationResult(req);
     if (!err.isEmpty()) {
-      res.status(400).json({
+      return res.status(400).json({
         errors: err.array(),
       });
     }
@@ -27,12 +27,12 @@ authRouter.post(
       const { email, password } = req.body as TLoginForm;
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ error: [{ msg: `The user with the email ${email} does not exist.` }] });
+        return res.status(400).json({ errors: [{ msg: `Invalid crendentials.` }] });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(400).json({ error: [{ msg: 'Invalid Credentials.' }] });
+        return res.status(400).json({ errors: [{ msg: 'Invalid Credentials.' }] });
       }
 
       const token = jwt.sign({ id: user._id as string, email: user.email }, config.get('jwtSecret'), {
