@@ -26,12 +26,12 @@ export interface ICharacter {
     wisdom: boolean;
     charisma: boolean;
   };
-  proficiency_bonus?: number;
+  proficiencyBonus?: number;
   weapon?: string;
   armor?: string;
   shield: boolean;
-  hitpoint_max?: number;
-  bio?: [string];
+  hitpointMax?: number;
+  bio?: string;
   wallet?: { cp: number; sp: number; gp: number };
 }
 
@@ -60,12 +60,12 @@ const CharacterSchema = new mongoose.Schema<ICharacter>({
     wisdom: { type: Boolean },
     charisma: { type: Boolean },
   },
-  proficiency_bonus: { type: Number },
+  proficiencyBonus: { type: Number },
   weapon: { type: String },
   armor: { type: String },
   shield: { type: Boolean },
-  hitpoint_max: { type: Number },
-  bio: [{ type: String }],
+  hitpointMax: { type: Number },
+  bio: { type: String },
   wallet: { cp: { type: Number }, sp: { type: Number }, gp: { type: Number } },
 });
 
