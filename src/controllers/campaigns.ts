@@ -1,8 +1,4 @@
 import express, { Request, Response } from 'express';
-import Character from '../models/Character';
-import axios from 'axios';
-import { calculateInitialHP, calculateProfBonus, embedSavingThrows } from '../utils/characterUtils';
-import { CharacterCreationInput } from '../types/characters';
 import Campaign from '../models/Campaign';
 import { CampaignStatus, ICampaignInput } from '../types/campaigns';
 import User from '../models/User';
@@ -10,7 +6,7 @@ import User from '../models/User';
 export const getCampaigns = async (req: Request, res: Response) => {
   const { id } = req.body.locals;
   try {
-    const campaigns = await Campaign.find({ DM: id });
+    const campaigns = await Campaign.find({ $or: [{ DM: id }, { 'characters.user': id }] });
     if (!campaigns) {
       return res.status(200).json([]);
     }

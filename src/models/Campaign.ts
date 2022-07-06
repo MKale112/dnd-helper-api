@@ -17,7 +17,6 @@ export interface ICampaign {
   dateEnded?: Date;
   imgUrl?: string;
   sessionLogs: string;
-  // sessions: Types.Array<ISession>;
 }
 
 // export interface ISession {
@@ -43,7 +42,7 @@ export const CampaignSchema = new mongoose.Schema<ICampaign>({
   ],
   status: { type: String },
   dateStarted: { type: Date, default: new Date(Date.now()) },
-  dateEnded: { type: Date, default: new Date(Date.now()) },
+  dateEnded: { type: Date },
   imgUrl: { type: String },
   sessionLogs: { type: String },
   // sessions: [

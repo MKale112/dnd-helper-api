@@ -7,9 +7,9 @@ import { CharacterCreationInput } from '../types/characters';
 export const getCharacters = async (req: Request, res: Response) => {
   const { id } = req.body.locals;
   try {
-    console.log(id);
+    // console.log(id);
     const characters = await Character.find({ playerId: id });
-    console.log(characters);
+    // console.log(characters);
     if (!characters) {
       return res.status(200).json([]);
     }
